@@ -1,0 +1,6 @@
+@NiceRestuarant_HostAddress = http://localhost:5222
+
+GET {{NiceRestuarant_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
