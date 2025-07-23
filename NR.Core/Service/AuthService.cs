@@ -1,6 +1,11 @@
-﻿using NR.Core.Interface;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using NR.Core.Interface;
+using NR.Domain.Interface;
+using NR.Domain.Model;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;

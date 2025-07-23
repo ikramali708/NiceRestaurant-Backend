@@ -1,4 +1,6 @@
-﻿using NR.Data.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using NR.Data.Context;
+using NR.Domain.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
