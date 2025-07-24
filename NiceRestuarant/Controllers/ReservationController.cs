@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NR.Core.Interface;
-using NR.Domain.Interface;
-using NR.Domain.Model;
+using NR.Core.DTOs;
+using NR.Domain.Entities;
+using NR.Domain.Interfaces;
 
 namespace NiceRestuarant.Controllers
 {
@@ -11,61 +10,78 @@ namespace NiceRestuarant.Controllers
     [ApiController]
     public class ReservationController : ControllerBase
     {
-        private readonly IRepository<Reservation> _repository;
-        private readonly IEmailService _emailService;
+        private readonly IReservationService _reservationService;
 
-        public ReservationController(IRepository<Reservation> repository, IEmailService emailService)
+        public ReservationController(IReservationService reservationService)
         {
-            _repository = repository;
-            _emailService = emailService;
+            _reservationService = reservationService;
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Get()
         {
-            var reservations = await _repository.GetAllAsync();
+            var reservations = await _reservationService.GetAllAsync();
             return Ok(reservations);
+        }
+
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                var reservation = await _reservationService.GetByIdAsync(id);
+                return Ok(reservation);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ReservationDto dto)
         {
-            var existing = (await _repository.GetAllAsync())
-                .Any(r => r.Date == dto.Date && r.Time == dto.Time && r.Status != "Canceled");
-            if (existing)
+            try
             {
-                return BadRequest("Time slot is already booked.");
+                await _reservationService.AddAsync(dto);
+                return CreatedAtAction(nameof(Get), new { id = 0 }, dto);
             }
-
-            var reservation = new Reservation
+            catch (Exception ex)
             {
-                Name = dto.Name,
-                Email = dto.Email,
-                Phone = dto.Phone,
-                Date = dto.Date,
-                Time = dto.Time,
-                PartySize = dto.PartySize,
-                SpecialRequests = dto.SpecialRequests,
-                Status = "Pending"
-            };
-            await _repository.AddAsync(reservation);
-
-            await _emailService.SendEmailAsync(dto.Email, "Reservation Confirmation",
-                $"Your reservation for {dto.Date} at {dto.Time} is confirmed.");
-            return CreatedAtAction(nameof(Get), new { id = reservation.Id }, reservation);
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Put(int id, [FromBody] ReservationDto dto)
         {
-            var reservation = await _repository.GetByIdAsync(id);
-            if (reservation == null) return NotFound();
+            try
+            {
+                await _reservationService.UpdateAsync(id, dto);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
-            reservation.Status = dto.Status; // e.g., Confirm or Cancel
-            await _repository.UpdateAsync(reservation);
-            return Ok(reservation);
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                await _reservationService.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

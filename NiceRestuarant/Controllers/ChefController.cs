@@ -8,20 +8,20 @@ namespace NiceRestuarant.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HeroController : ControllerBase
+    public class ChefController : ControllerBase
     {
-        private readonly IHeroService _heroService;
+        private readonly IChefService _chefService;
 
-        public HeroController(IHeroService heroService)
+        public ChefController(IChefService chefService)
         {
-            _heroService = heroService;
+            _chefService = chefService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var heroes = await _heroService.GetAllAsync();
-            return Ok(heroes);
+            var chefs = await _chefService.GetAllAsync();
+            return Ok(chefs);
         }
 
         [HttpGet("{id}")]
@@ -29,8 +29,8 @@ namespace NiceRestuarant.Controllers
         {
             try
             {
-                var hero = await _heroService.GetByIdAsync(id);
-                return Ok(hero);
+                var chef = await _chefService.GetByIdAsync(id);
+                return Ok(chef);
             }
             catch (Exception ex)
             {
@@ -40,11 +40,11 @@ namespace NiceRestuarant.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post([FromBody] HeroDto dto)
+        public async Task<IActionResult> Post([FromForm] ChefDto dto, IFormFile? file)
         {
             try
             {
-                await _heroService.AddAsync(dto);
+                await _chefService.AddAsync(dto, file);
                 return CreatedAtAction(nameof(Get), new { id = 0 }, dto);
             }
             catch (Exception ex)
@@ -55,11 +55,11 @@ namespace NiceRestuarant.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Put(int id, [FromBody] HeroDto dto)
+        public async Task<IActionResult> Put(int id, [FromForm] ChefDto dto, IFormFile? file)
         {
             try
             {
-                await _heroService.UpdateAsync(id, dto);
+                await _chefService.UpdateAsync(id, dto, file);
                 return Ok();
             }
             catch (Exception ex)
@@ -74,7 +74,7 @@ namespace NiceRestuarant.Controllers
         {
             try
             {
-                await _heroService.DeleteAsync(id);
+                await _chefService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)

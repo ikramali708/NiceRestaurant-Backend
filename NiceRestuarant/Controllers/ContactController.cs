@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NR.Core.Interface;
-using NR.Domain.Interface;
-using NR.Domain.Model;
 using NR.Core.DTOs;
+using NR.Domain.Entities;
+using NR.Domain.Interfaces;
 
 namespace NiceRestuarant.Controllers
 {
@@ -12,38 +10,48 @@ namespace NiceRestuarant.Controllers
     [ApiController]
     public class ContactController : ControllerBase
     {
-        private readonly IRepository<NR.Core.DTOs.ContactSubmission> _repository;
-        private readonly IEmailService _emailService;
+        private readonly IContactSubmissionService _contactService;
 
-        public ContactController(IRepository<NR.Core.DTOs.ContactSubmission> repository, IEmailService emailService)
+        public ContactController(IContactSubmissionService contactService)
         {
-            _repository = repository;
-            _emailService = emailService;
+            _contactService = contactService;
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Get()
         {
-            var submissions = await _repository.GetAllAsync();
+            var submissions = await _contactService.GetAllAsync();
             return Ok(submissions);
+        }
+
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                var submission = await _contactService.GetByIdAsync(id);
+                return Ok(submission);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ContactSubmissionDto dto)
         {
-            var submission = new NR.Core.DTOs.ContactSubmission
+            try
             {
-                Name = dto.Name,
-                Email = dto.Email,
-                Subject = dto.Subject,
-                Message = dto.Message,
-                Timestamp = DateTime.UtcNow
-            };
-            await _repository.AddAsync(submission);
-
-            await _emailService.SendEmailAsync("restaurant@example.com", dto.Subject, dto.Message);
-            return Ok();
+                await _contactService.AddAsync(dto);
+                return CreatedAtAction(nameof(Get), new { id = 0 }, dto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NiceRestaurantBackend.Core.DTOs;
 using NR.Core.DTOs;
 using NR.Domain.Entities;
 using NR.Domain.Interfaces;
@@ -8,20 +9,20 @@ namespace NiceRestuarant.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HeroController : ControllerBase
+    public class BlogController : ControllerBase
     {
-        private readonly IHeroService _heroService;
+        private readonly IBlogService _blogService;
 
-        public HeroController(IHeroService heroService)
+        public BlogController(IBlogService blogService)
         {
-            _heroService = heroService;
+            _blogService = blogService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var heroes = await _heroService.GetAllAsync();
-            return Ok(heroes);
+            var blogs = await _blogService.GetAllAsync();
+            return Ok(blogs);
         }
 
         [HttpGet("{id}")]
@@ -29,8 +30,8 @@ namespace NiceRestuarant.Controllers
         {
             try
             {
-                var hero = await _heroService.GetByIdAsync(id);
-                return Ok(hero);
+                var blog = await _blogService.GetByIdAsync(id);
+                return Ok(blog);
             }
             catch (Exception ex)
             {
@@ -40,11 +41,11 @@ namespace NiceRestuarant.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post([FromBody] HeroDto dto)
+        public async Task<IActionResult> Post([FromBody] BlogDto dto)
         {
             try
             {
-                await _heroService.AddAsync(dto);
+                await _blogService.AddAsync(dto);
                 return CreatedAtAction(nameof(Get), new { id = 0 }, dto);
             }
             catch (Exception ex)
@@ -55,11 +56,11 @@ namespace NiceRestuarant.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Put(int id, [FromBody] HeroDto dto)
+        public async Task<IActionResult> Put(int id, [FromBody] BlogDto dto)
         {
             try
             {
-                await _heroService.UpdateAsync(id, dto);
+                await _blogService.UpdateAsync(id, dto);
                 return Ok();
             }
             catch (Exception ex)
@@ -74,7 +75,7 @@ namespace NiceRestuarant.Controllers
         {
             try
             {
-                await _heroService.DeleteAsync(id);
+                await _blogService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)

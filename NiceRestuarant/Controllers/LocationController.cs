@@ -8,20 +8,20 @@ namespace NiceRestuarant.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HeroController : ControllerBase
+    public class LocationController : ControllerBase
     {
-        private readonly IHeroService _heroService;
+        private readonly ILocationService _locationService;
 
-        public HeroController(IHeroService heroService)
+        public LocationController(ILocationService locationService)
         {
-            _heroService = heroService;
+            _locationService = locationService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var heroes = await _heroService.GetAllAsync();
-            return Ok(heroes);
+            var locations = await _locationService.GetAllAsync();
+            return Ok(locations);
         }
 
         [HttpGet("{id}")]
@@ -29,8 +29,8 @@ namespace NiceRestuarant.Controllers
         {
             try
             {
-                var hero = await _heroService.GetByIdAsync(id);
-                return Ok(hero);
+                var location = await _locationService.GetByIdAsync(id);
+                return Ok(location);
             }
             catch (Exception ex)
             {
@@ -40,11 +40,11 @@ namespace NiceRestuarant.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post([FromBody] HeroDto dto)
+        public async Task<IActionResult> Post([FromBody] LocationDto dto)
         {
             try
             {
-                await _heroService.AddAsync(dto);
+                await _locationService.AddAsync(dto);
                 return CreatedAtAction(nameof(Get), new { id = 0 }, dto);
             }
             catch (Exception ex)
@@ -55,11 +55,11 @@ namespace NiceRestuarant.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Put(int id, [FromBody] HeroDto dto)
+        public async Task<IActionResult> Put(int id, [FromBody] LocationDto dto)
         {
             try
             {
-                await _heroService.UpdateAsync(id, dto);
+                await _locationService.UpdateAsync(id, dto);
                 return Ok();
             }
             catch (Exception ex)
@@ -74,7 +74,7 @@ namespace NiceRestuarant.Controllers
         {
             try
             {
-                await _heroService.DeleteAsync(id);
+                await _locationService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)

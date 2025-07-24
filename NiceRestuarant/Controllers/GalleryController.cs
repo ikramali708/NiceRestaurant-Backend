@@ -8,20 +8,20 @@ namespace NiceRestuarant.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HeroController : ControllerBase
+    public class GalleryController : ControllerBase
     {
-        private readonly IHeroService _heroService;
+        private readonly IGalleryImageService _galleryService;
 
-        public HeroController(IHeroService heroService)
+        public GalleryController(IGalleryImageService galleryService)
         {
-            _heroService = heroService;
+            _galleryService = galleryService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var heroes = await _heroService.GetAllAsync();
-            return Ok(heroes);
+            var images = await _galleryService.GetAllAsync();
+            return Ok(images);
         }
 
         [HttpGet("{id}")]
@@ -29,8 +29,8 @@ namespace NiceRestuarant.Controllers
         {
             try
             {
-                var hero = await _heroService.GetByIdAsync(id);
-                return Ok(hero);
+                var image = await _galleryService.GetByIdAsync(id);
+                return Ok(image);
             }
             catch (Exception ex)
             {
@@ -40,11 +40,11 @@ namespace NiceRestuarant.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post([FromBody] HeroDto dto)
+        public async Task<IActionResult> Post([FromForm] GalleryImageDto dto, IFormFile? file)
         {
             try
             {
-                await _heroService.AddAsync(dto);
+                await _galleryService.AddAsync(dto, file);
                 return CreatedAtAction(nameof(Get), new { id = 0 }, dto);
             }
             catch (Exception ex)
@@ -55,11 +55,11 @@ namespace NiceRestuarant.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Put(int id, [FromBody] HeroDto dto)
+        public async Task<IActionResult> Put(int id, [FromForm] GalleryImageDto dto, IFormFile? file)
         {
             try
             {
-                await _heroService.UpdateAsync(id, dto);
+                await _galleryService.UpdateAsync(id, dto, file);
                 return Ok();
             }
             catch (Exception ex)
@@ -74,7 +74,7 @@ namespace NiceRestuarant.Controllers
         {
             try
             {
-                await _heroService.DeleteAsync(id);
+                await _galleryService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)
